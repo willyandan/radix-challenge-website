@@ -1,61 +1,42 @@
-// 'use client'
-// import { LineChart } from "@mui/x-charts";
-// import { FunctionComponent } from "react";
-// import { SensorChartData } from "../api/fetchSensorChart";
-
 import { LineChart } from "@mui/x-charts"
 import { FunctionComponent } from "react"
 
 type ChartProps = {
-  sensors: Array<SensorChartData>
+  data: Array<{ timestamp: string, equipmentId: string, average: number }>
 }
 
-// const sensorChartDataToSeries = (sensors: Array<SensorChartData>) => {
-//   const equipmentsIds = sensors
-//     .map((sensor) => {
-//       return sensor.equipments.map((equipments) => equipments.equipmentId)
-//     })
-//   const equipmentMap = sensors
-//     .map((sensor) => {
-//       return sensor.equipments.map((equipments) => ({ ...equipments, timestamp: sensor.timestamp }))
-//     })
-//     .reduce((data, sensor) => {
-//       return [
-//         ...data,
-//         ...sensor
-//       ]
-//     }, [])
-//     .reduce((map, sensor) => {
-//       const key = `${sensor.equipmentId}@${sensor.timestamp}`
-//       return {
-//         ...map,
-//         [key]: sensor.average
-//       }
-//     }, {})
+const dataToSeries = (data: Array<{ timestamp: string, equipmentId: string, average: number }>) => {
+  const xAxisData = data.map(({ timestamp }) => new Date(timestamp))
+  const series: Record<string, Array<number>> = {}
 
-//   return equipmentsIds.map(id => {
-//     const data = sensors.map(({ timestamp }) => equipmentMap[`${id}@${timestamp}`] || 0)
-//     return { data }
-//   })
+  data.forEach(({ average, equipmentId }) => {
+    const list = series[equipmentId] || []
+    list.push(average)
+    series[equipmentId] = list
+  })
 
-// }
+  const seriesList = Object.keys(series).map((key) => ({ data: series[key], connectNulls: true, label: key }))
 
-const EquipmentAverage: FunctionComponent<ChartProps> = ({ sensors }) => {
+  return {
+    series: seriesList,
+    xAxisData
+  }
+}
+
+const EquipmentAverage: FunctionComponent<ChartProps> = ({ data }) => {
+  const { series, xAxisData } = dataToSeries(data || [])
 
   return (
-    <LineChart
-      xAxis={[{ data: [] }]}
-      series={
-        [
-          {
-            data: [],
-          },
-        ]}
-      height={600}
-      margin={{ left: 30, right: 30, top: 30, bottom: 30 }
-      }
-      grid={{ vertical: true, horizontal: true }}
-    />
+    <>
+      <h3 className="text-center">Average equipment value by time (Select one or more equipments do see the data)</h3>
+      <LineChart
+        xAxis={[{ data: xAxisData, scaleType: 'time' }]}
+        series={series}
+        height={600}
+        margin={{ left: 30, right: 30, top: 30, bottom: 30 }
+        }
+      />
+    </>
   )
 }
 

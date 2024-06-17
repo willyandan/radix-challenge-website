@@ -1,10 +1,12 @@
 'use client'
+
 import { FunctionComponent, useEffect, useState } from "react";
 import { fetchChartSensorAvg, fetchEquipmentAvg, fetchEquipmentStdDev } from "../api/sensorApi";
 import ChartForm from "./chartForm";
 import SensorAvgChart from "./charts/sensorAvgChart";
 import EquipmentStdDev from "./charts/equipmentStdDev";
 import EquipmentAverage from "./charts/equipmentAverage"
+
 
 type ChartProps = {
   unitTimeOptions: Array<string>
